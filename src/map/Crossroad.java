@@ -11,6 +11,7 @@ public class Crossroad {
     private Random random;
     private boolean isEntryCrossroad = false;
     private boolean hasCarService = false;
+    private Street currentStreet;
 
     public Crossroad(Street[] streets) {
         random = new Random();
@@ -33,11 +34,19 @@ public class Crossroad {
         return crossroad;
     }
 
-    public Street turnRandomly(Street current) {
+    public Street getNextStreet(Street current) {
         Street next = current;
         while (next == current) {
             next = adjacentStreets.get(random.nextInt(adjacentStreets.size()));
         }
         return next;
+    }
+
+    public List<Street> getAdjacentStreets() {
+        return adjacentStreets;
+    }
+
+    public void setCurrentStreet(Street currentStreet) {
+        this.currentStreet = currentStreet;
     }
 }

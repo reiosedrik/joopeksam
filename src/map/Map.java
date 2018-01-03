@@ -36,8 +36,20 @@ public class Map {
         crossroads.add(crossroad);
     }
 
+    // MAY RETURN CURRENT CROSSROAD
+    public Crossroad getNextCrossRoad(Crossroad currentCrossroad, Street currentStreet) {
+        Crossroad nextCrossroad = currentCrossroad;
+        for (Crossroad crossroad : crossroads) {
+            if (crossroad != currentCrossroad && crossroad.getAdjacentStreets().contains(currentStreet)) {
+                nextCrossroad = crossroad;
+            }
+        }
+        nextCrossroad.setCurrentStreet(nextCrossroad.getNextStreet(currentStreet));
+        return nextCrossroad;
+    }
 
-    private static Street[] twoWay(String n1, String n2) {
+
+    public static Street[] twoWay(String n1, String n2) {
         return new Street[] {new Street(n1), new Street(n2)};
     }
 
