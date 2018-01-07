@@ -2,16 +2,21 @@ package map;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Map {
 
     private List<Crossroad> crossroads;
+    private List<Crossroad> entryCrossroads;
+    private Random random;
 
     public Map() {
         crossroads = new ArrayList<>();
+        random = new Random();
     }
 
-    public static Map ofKristiine() {
+    public static Map createNew() {
         Map map = new Map();
         map.add(Crossroad.withEntry(twoWay("Vuti", "Leevikese")));
         map.add(Crossroad.withEntry(threeWay("Leevikese", "Rästa", "Käo")));
@@ -28,7 +33,7 @@ public class Map {
         map.add(new Crossroad(twoWay("Luige", "Kotka")));
         map.add(new Crossroad(threeWay("Kotka", "Liblika", "Kajaka")));
         map.add(Crossroad.withCarService(twoWay("Kajaka", "Tihase")));
-
+        map.setEntranceCrossroads();
         return map;
     }
 
@@ -36,13 +41,16 @@ public class Map {
         crossroads.add(crossroad);
     }
 
-    // MAY RETURN CURRENT CROSSROAD
-    public Crossroad getNextCrossRoad(Crossroad currentCrossroad, Street currentStreet) {
-        Crossroad nextCrossroad = currentCrossroad;
+    public Crossroad getNextCrossRoad(Crossroad currentCrossroad) {
+        Street currentStreet = currentCrossroad.getCurrentStreet();
+        if (currentStreet == null) {
+            currentStreet = currentCrossroad.getNextStreet(null);
+        }
+        Crossroad nextCrossroad = null;
         for (Crossroad crossroad : crossroads) {
-            if (crossroad != currentCrossroad && crossroad.getAdjacentStreets().contains(currentStreet)) {
-                nextCrossroad = crossroad;
-            }
+                if (crossroad.isNextTo(currentCrossroad, currentStreet)) {
+                    nextCrossroad = crossroad;
+                }
         }
         nextCrossroad.setCurrentStreet(nextCrossroad.getNextStreet(currentStreet));
         return nextCrossroad;
@@ -59,5 +67,13 @@ public class Map {
 
     private static Street[] fourWay(String n1, String n2, String n3, String n4) {
         return new Street[] {new Street(n1), new Street(n2), new Street(n3), new Street(n4)};
+    }
+
+    public void setEntranceCrossroads() {
+        entryCrossroads = crossroads.stream().filter(Crossroad::isEntryCrossroad).collect(Collectors.toList());
+    }
+
+    public Crossroad getRandomEntryCrossroad() {
+        return entryCrossroads.get(random.nextInt(entryCrossroads.size()));
     }
 }

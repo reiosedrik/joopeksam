@@ -12,10 +12,20 @@ public class Crossroad {
     private boolean isEntryCrossroad = false;
     private boolean hasCarService = false;
     private Street currentStreet;
+    private String name;
 
     public Crossroad(Street[] streets) {
         random = new Random();
         adjacentStreets.addAll(Arrays.asList(streets));
+        name = createName();
+    }
+
+    private String createName() {
+        String finalName = "";
+        for (Street street : adjacentStreets) {
+            finalName = finalName.concat(street.getName() + "-");
+        }
+        return finalName.substring(0, finalName.length() - 1);
     }
 
     public static Crossroad withEntry(Street[] streets) {
@@ -35,11 +45,27 @@ public class Crossroad {
     }
 
     public Street getNextStreet(Street current) {
-        Street next = current;
-        while (next == current) {
+        if (current == null) current = adjacentStreets.get(random.nextInt(adjacentStreets.size()));
+        Street next;
+        while (true) {
             next = adjacentStreets.get(random.nextInt(adjacentStreets.size()));
+            if (!next.getName().equals(current.getName())) {
+                return next;
+            }
         }
-        return next;
+    }
+
+    public boolean hasStreetWithName(String name) {
+        for (Street street: adjacentStreets) {
+            if (street.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isNextTo(Crossroad crossroad, Street street) {
+        return crossroad.hasStreetWithName(street.getName()) && crossroad != this && this.hasStreetWithName(street.getName());
     }
 
     public List<Street> getAdjacentStreets() {
@@ -48,5 +74,21 @@ public class Crossroad {
 
     public void setCurrentStreet(Street currentStreet) {
         this.currentStreet = currentStreet;
+    }
+
+    public boolean isEntryCrossroad() {
+        return isEntryCrossroad;
+    }
+
+    public boolean isHasCarService() {
+        return hasCarService;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Street getCurrentStreet() {
+        return currentStreet;
     }
 }
