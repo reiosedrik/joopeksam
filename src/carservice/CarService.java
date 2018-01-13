@@ -1,6 +1,8 @@
 package carservice;
 
 import car.Car;
+import car.Engine;
+import datacenter.DataCenter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +14,17 @@ public class CarService {
     private String name;
     private int timesUsed = 0;
     private List<Car> carsThatHaveUsedThis = new ArrayList<>();
+    private DataCenter dataCenter;
 
     public CarService(String name) {
         this.name = name + " Car Service";
+        this.dataCenter = dataCenter;
     }
 
     public void waitInLine(Car car) {
-        carsWaiting.add(car);
+        synchronized (carsWaiting) {
+            carsWaiting.add(car);
+        }
     }
 
     public boolean isFirstInLine(Car car) {
@@ -26,6 +32,9 @@ public class CarService {
     }
 
     public synchronized void use(Car car) throws InterruptedException {
+        if (car.needsEconomicEngine()) {
+            car.setEngine(getNewEngineForCar());
+        }
         synchronized (car) {
             car.wait(50);
         }
@@ -47,5 +56,9 @@ public class CarService {
 
     public void getInfoAboutServedCars(Predicate<Car> p) {
         System.out.println("served cars");
+    }
+
+    private Engine getNewEngineForCar() {
+        return Math.random() < 0.5 ? Engine.ELECTRIC : Engine.LEMONADE;
     }
 }

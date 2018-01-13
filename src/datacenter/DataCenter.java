@@ -2,6 +2,7 @@ package datacenter;
 
 import car.Car;
 import car.Engine;
+import car.HelpCar;
 import map.Map;
 
 import java.util.ArrayList;
@@ -17,9 +18,23 @@ public class DataCenter {
     private List<Car> cars = new ArrayList<>();
     private boolean resetting = false;
     private int amountPollutionHasBeenReset = 0;
+    private List<Car> carsNeedingHelp = new ArrayList<>();
+    private HelpCar helpCar;
 
     public DataCenter(Map map) {
         this.map = map;
+    }
+
+    public void askForHelp(Car car) {
+        carsNeedingHelp.add(car);
+        if (helpCar == null) {
+            helpCar = new HelpCar(this, Engine.ELECTRIC, -1);
+        }
+        if (!helpCar.isWorking()) {
+            helpCar.setWorking(true);
+            Thread carHelpThread = new Thread(helpCar);
+            carHelpThread.start();
+        }
     }
 
     public synchronized void increasePollutionForFiveStreets(Engine engine) {
@@ -100,5 +115,17 @@ public class DataCenter {
 
     public int getAmountPollutionHasBeenReset() {
         return amountPollutionHasBeenReset;
+    }
+
+    public List<Car> getCars() {
+        return cars;
+    }
+
+    public List<Car> getCarsNeedingHelp() {
+        return carsNeedingHelp;
+    }
+
+    public double getPollution() {
+        return pollution;
     }
 }

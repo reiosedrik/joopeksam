@@ -4,6 +4,7 @@ package map;
 public class Street {
 
     private String name;
+    private boolean badRoadConditions = false;
 
     public Street(String name) {
         this.name = name;
@@ -11,5 +12,13 @@ public class Street {
 
     public String getName() {
         return name;
+    }
+
+    public boolean hasBadRoadConditions() {
+        return badRoadConditions;
+    }
+
+    public void setBadRoadConditions(boolean badRoadConditions) {
+        this.badRoadConditions = badRoadConditions;
     }
 }

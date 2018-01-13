@@ -34,8 +34,11 @@ public class Map {
         map.add(new Crossroad(threeWay("Kotka", "Liblika", "Kajaka")));
         map.add(Crossroad.withCarService(twoWay("Kajaka", "Tihase")));
         map.setEntranceCrossroads();
+        map.getCrossroads().get(4).getAdjacentStreets().get(0).setBadRoadConditions(true);
+        map.getCrossroads().get(8).getAdjacentStreets().get(0).setBadRoadConditions(true);
         return map;
     }
+
 
     public void add(Crossroad crossroad) {
         crossroads.add(crossroad);
@@ -75,5 +78,9 @@ public class Map {
 
     public Crossroad getRandomEntryCrossroad() {
         return entryCrossroads.get(random.nextInt(entryCrossroads.size()));
+    }
+
+    public List<Crossroad> getCrossroads() {
+        return crossroads;
     }
 }

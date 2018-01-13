@@ -10,14 +10,18 @@ import java.util.Random;
 
 public class Car implements Runnable {
 
-    private Engine engine;
-    private Street currentStreet;
-    private Crossroad currentCrossRoad;
-    private Random random;
-    private Map map;
-    private int amountOfStreetsPassed = 0;
-    private DataCenter dataCenter;
-    private int n;
+    protected Engine engine;
+    protected Street currentStreet;
+    protected Crossroad currentCrossRoad;
+    protected Random random;
+    protected Map map;
+    protected int amountOfStreetsPassed = 0;
+    protected DataCenter dataCenter;
+    protected int n;
+    protected int timesStoppedBecauseOfPollution = 0;
+    protected int timesDrivenThroughStreetWithBadConditions = 0;
+    protected boolean needsEconomicEngine = false;
+    protected Tires tires = Tires.DEFAULT;
 
     public Car(DataCenter dataCenter, Engine engine, int n) {
         this.n = n;
@@ -30,20 +34,31 @@ public class Car implements Runnable {
     }
 
 
-    private void drive() throws InterruptedException {
+    public void drive() throws InterruptedException {
         driveThroughStreet();
         turnToNextStreet();
     }
 
-    private void turnToNextStreet() throws InterruptedException {
+    public void turnToNextStreet() throws InterruptedException {
         getTheStreetBeforeTurning();
-//        if (currentStreet!= null )System.out.println(n + " drove through " + currentStreet.getName());
         currentCrossRoad = map.getNextCrossRoad(currentCrossRoad);
+        if (currentStreet!= null) {
+            if (timesDrivenThroughStreetWithBadConditions >= 3 && tires == Tires.DEFAULT) {
+                askForHelpAndWait();
+            }
+        }
         useCarServiceIfExists();
         getTheStreetAfterTurning();
     }
 
-    private void useCarServiceIfExists() throws InterruptedException {
+    public void askForHelpAndWait() throws InterruptedException {
+        dataCenter.askForHelp(this);
+        synchronized (this) {
+            wait();
+        }
+    }
+
+    public void useCarServiceIfExists() throws InterruptedException {
         if (currentCrossRoad.hasCarService()) {
             CarService service = currentCrossRoad.getCarService();
             service.waitInLine(this);
@@ -56,17 +71,20 @@ public class Car implements Runnable {
         }
     }
 
-    private void getTheStreetAfterTurning() {
+    public void getTheStreetAfterTurning() {
         currentStreet = currentCrossRoad.getNextStreet(currentStreet);
     }
 
-    private void getTheStreetBeforeTurning() {
+    public void getTheStreetBeforeTurning() {
         currentStreet = currentCrossRoad.getCurrentStreet();
 //        if (currentStreet != null )System.out.println(currentStreet.getName());
 
     }
 
-    private void driveThroughStreet() throws InterruptedException {
+    public void driveThroughStreet() throws InterruptedException {
+        if (currentStreet != null && currentStreet.hasBadRoadConditions()) {
+            timesDrivenThroughStreetWithBadConditions++;
+        }
         boolean hasDrivenThroughFiveStreetsInARow = amountOfStreetsPassed % 5 == 0;
         boolean hasDrivenThroughSevenStreetsInARow = amountOfStreetsPassed % 7 == 0;
         Thread.sleep(getRandomTimeForDrivingThroughStreet());
@@ -81,16 +99,24 @@ public class Car implements Runnable {
                 synchronized (this) {
                     wait();
                 }
+                timesStoppedBecauseOfPollution++;
+                if (timesStoppedBecauseOfPollution >= 2) {
+                    decideIfShouldUseEconomicEngine();
+                }
             }
         }
     }
 
+    public void decideIfShouldUseEconomicEngine() {
+        if (Math.random() < 1.0 / 6.0) needsEconomicEngine = true;
+    }
 
-    private void sendInfoToDataCenter() {
+
+    public void sendInfoToDataCenter() {
         dataCenter.increasePollutionForFiveStreets(engine);
     }
 
-    private int getRandomTimeForDrivingThroughStreet() {
+    public int getRandomTimeForDrivingThroughStreet() {
         final int MIN_TIME = 3;
         final int MAX_TIME = 20;
         return random.nextInt((MAX_TIME - MIN_TIME) + 1) + MIN_TIME;
@@ -111,7 +137,31 @@ public class Car implements Runnable {
         return engine;
     }
 
+    public void setEngine(Engine engine) {
+        this.engine = engine;
+    }
+
     public int getN() {
         return n;
+    }
+
+    public boolean needsEconomicEngine() {
+        return needsEconomicEngine;
+    }
+
+    public DataCenter getDataCenter() {
+        return dataCenter;
+    }
+
+    public Crossroad getCurrentCrossRoad() {
+        return currentCrossRoad;
+    }
+
+    public void setTimesDrivenThroughStreetWithBadConditions(int timesDrivenThroughStreetWithBadConditions) {
+        this.timesDrivenThroughStreetWithBadConditions = timesDrivenThroughStreetWithBadConditions;
+    }
+
+    public void setTires(Tires tires) {
+        this.tires = tires;
     }
 }
