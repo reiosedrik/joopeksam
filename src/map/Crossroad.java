@@ -1,5 +1,7 @@
 package map;
 
+import carservice.CarService;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +15,9 @@ public class Crossroad {
     private boolean hasCarService = false;
     private Street currentStreet;
     private String name;
+    private boolean isCarServiceAvailable;
+    private CarService carService;
+
 
     public Crossroad(Street[] streets) {
         random = new Random();
@@ -41,6 +46,8 @@ public class Crossroad {
         crossroad.random = new Random();
         crossroad.adjacentStreets.addAll(Arrays.asList(streets));
         crossroad.hasCarService = true;
+        crossroad.isCarServiceAvailable = true;
+        crossroad.carService = new CarService(crossroad.getName());
         return crossroad;
     }
 
@@ -64,6 +71,24 @@ public class Crossroad {
         return false;
     }
 
+    public void startUsingCarService() {
+        synchronized (this) {
+            isCarServiceAvailable = false;
+        }
+    }
+
+    public void finishUsingCarService(int n) {
+        synchronized (this) {
+            isCarServiceAvailable = true;
+        }
+        System.out.println(String.format("Car %d finished using car service at %s", n, name));
+    }
+
+
+    public boolean isCarServiceAvailable() {
+        return isCarServiceAvailable;
+    }
+
     public boolean isNextTo(Crossroad crossroad, Street street) {
         return crossroad.hasStreetWithName(street.getName()) && crossroad != this && this.hasStreetWithName(street.getName());
     }
@@ -80,7 +105,7 @@ public class Crossroad {
         return isEntryCrossroad;
     }
 
-    public boolean isHasCarService() {
+    public boolean hasCarService() {
         return hasCarService;
     }
 
@@ -90,5 +115,9 @@ public class Crossroad {
 
     public Street getCurrentStreet() {
         return currentStreet;
+    }
+
+    public CarService getCarService() {
+        return carService;
     }
 }

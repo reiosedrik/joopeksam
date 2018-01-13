@@ -1,5 +1,6 @@
 package car;
 
+import carservice.CarService;
 import datacenter.DataCenter;
 import map.Crossroad;
 import map.Map;
@@ -18,31 +19,51 @@ public class Car implements Runnable {
     private DataCenter dataCenter;
     private int n;
 
-    public Car(DataCenter dataCenter, int n) {
+    public Car(DataCenter dataCenter, Engine engine, int n) {
         this.n = n;
         this.map = dataCenter.getMap();
         currentCrossRoad = map.getRandomEntryCrossroad();
         random = new Random();
         this.dataCenter = dataCenter;
-        createRandomEngine();
-        dataCenter.incrementCarCount();
+        this.engine = engine;
+        dataCenter.addCar(this);
     }
 
-    private void createRandomEngine() {
-        engine = Engine.values()[random.nextInt(Engine.values().length)];
-    }
 
     private void drive() throws InterruptedException {
         driveThroughStreet();
         turnToNextStreet();
     }
 
-    private void turnToNextStreet() {
-        currentStreet = currentCrossRoad.getCurrentStreet();
-        if (currentStreet != null )System.out.println(currentStreet.getName());
-
+    private void turnToNextStreet() throws InterruptedException {
+        getTheStreetBeforeTurning();
+//        if (currentStreet!= null )System.out.println(n + " drove through " + currentStreet.getName());
         currentCrossRoad = map.getNextCrossRoad(currentCrossRoad);
+        useCarServiceIfExists();
+        getTheStreetAfterTurning();
+    }
+
+    private void useCarServiceIfExists() throws InterruptedException {
+        if (currentCrossRoad.hasCarService()) {
+            CarService service = currentCrossRoad.getCarService();
+            service.waitInLine(this);
+            while (!service.isFirstInLine(this)) {
+                synchronized (this) {
+                    wait();
+                }
+            }
+            service.use(this);
+        }
+    }
+
+    private void getTheStreetAfterTurning() {
         currentStreet = currentCrossRoad.getNextStreet(currentStreet);
+    }
+
+    private void getTheStreetBeforeTurning() {
+        currentStreet = currentCrossRoad.getCurrentStreet();
+//        if (currentStreet != null )System.out.println(currentStreet.getName());
+
     }
 
     private void driveThroughStreet() throws InterruptedException {
@@ -50,22 +71,23 @@ public class Car implements Runnable {
         boolean hasDrivenThroughSevenStreetsInARow = amountOfStreetsPassed % 7 == 0;
         Thread.sleep(getRandomTimeForDrivingThroughStreet());
         amountOfStreetsPassed++;
+        dataCenter.increasePollutionForFiveStreets(engine);
         if (hasDrivenThroughFiveStreetsInARow) {
             sendInfoToDataCenter();
         }
-//        if (hasDrivenThroughSevenStreetsInARow) {
-//            if (!dataCenter.isAllowedToDriveWith(Engine engine)) {
-//                waitUntilAllowedToDriveAgain();
-//            }
-//        }
+        if (hasDrivenThroughSevenStreetsInARow) {
+            if (!dataCenter.isDrivingAllowedWith(engine)) {
+//                System.out.println("not allowed " + engine);
+                synchronized (this) {
+                    wait();
+                }
+            }
+        }
     }
 
-    private void waitUntilAllowedToDriveAgain() {
-
-    }
 
     private void sendInfoToDataCenter() {
-
+        dataCenter.increasePollutionForFiveStreets(engine);
     }
 
     private int getRandomTimeForDrivingThroughStreet() {
@@ -76,7 +98,7 @@ public class Car implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
+        while (dataCenter.getAmountPollutionHasBeenReset() < 5) {
             try {
                 drive();
             } catch (InterruptedException e) {
@@ -85,4 +107,11 @@ public class Car implements Runnable {
         }
     }
 
+    public Engine getEngine() {
+        return engine;
+    }
+
+    public int getN() {
+        return n;
+    }
 }
