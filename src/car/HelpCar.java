@@ -41,7 +41,7 @@ public class HelpCar extends Car {
             }
             car.setTimesDrivenThroughStreetWithBadConditions(0);
             if (car.getEngine() == Engine.LEMONADE || car.getEngine() == Engine.ELECTRIC) {
-                car.setTires(Tires.MARMELADE);
+                car.setTires(Tires.MARMALADE);
             }
             synchronized (car) {
                 car.notify();
@@ -80,6 +80,9 @@ public class HelpCar extends Car {
             }
         }
         isWorking = false;
+        synchronized (dataCenter.getCars()) {
+            dataCenter.getCars().remove(this);
+        }
     }
 
     public boolean isWorking() {

@@ -10,18 +10,19 @@ import java.util.Random;
 
 public class Car implements Runnable {
 
-    protected Engine engine;
-    protected Street currentStreet;
-    protected Crossroad currentCrossRoad;
-    protected Random random;
-    protected Map map;
-    protected int amountOfStreetsPassed = 0;
-    protected DataCenter dataCenter;
-    protected int n;
-    protected int timesStoppedBecauseOfPollution = 0;
-    protected int timesDrivenThroughStreetWithBadConditions = 0;
-    protected boolean needsEconomicEngine = false;
-    protected Tires tires = Tires.DEFAULT;
+    Engine engine;
+    Crossroad currentCrossRoad;
+    Map map;
+    int amountOfStreetsPassed = 0;
+    DataCenter dataCenter;
+
+    private Street currentStreet;
+    private Random random;
+    private int n;
+    private int timesStoppedBecauseOfPollution = 0;
+    private int timesDrivenThroughStreetWithBadConditions = 0;
+    private boolean needsEconomicEngine = false;
+    private Tires tires = Tires.DEFAULT;
 
     public Car(DataCenter dataCenter, Engine engine, int n) {
         this.n = n;
@@ -130,6 +131,10 @@ public class Car implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+        synchronized (dataCenter.getCars()) {
+            dataCenter.getCars().remove(this);
+            System.out.println(n + " stopped, left: " + dataCenter.getCars().size());
         }
     }
 

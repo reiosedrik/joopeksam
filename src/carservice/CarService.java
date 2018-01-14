@@ -14,11 +14,9 @@ public class CarService {
     private String name;
     private int timesUsed = 0;
     private List<Car> carsThatHaveUsedThis = new ArrayList<>();
-    private DataCenter dataCenter;
 
     public CarService(String name) {
         this.name = name + " Car Service";
-        this.dataCenter = dataCenter;
     }
 
     public void waitInLine(Car car) {
@@ -48,10 +46,7 @@ public class CarService {
             }
         }
         timesUsed++;
-        System.out.println(String.format("Car %d used %s", car.getN(), name));
-//        if (timesUsed > 100) {
-//            getInfoAboutServedCars(c -> c.getN() > 5);
-//        }
+        System.out.println(String.format("Car %d used %s cars in line: %d", car.getN(), name, carsWaiting.size()));
     }
 
     public void getInfoAboutServedCars(Predicate<Car> p) {

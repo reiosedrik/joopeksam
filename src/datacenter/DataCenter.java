@@ -1,8 +1,10 @@
 package datacenter;
 
+import bird.Bird;
 import car.Car;
 import car.Engine;
 import car.HelpCar;
+import format.CityDataFormat;
 import map.Map;
 
 import java.util.ArrayList;
@@ -15,18 +17,21 @@ public class DataCenter {
     private int internalCombustionEngineCount = 0;
     private double pollution = 0;
     private static final int POLLUTION_AMOUNT_FOR_RESETTING = 400;
-    private List<Car> cars = new ArrayList<>();
+    private List<Car> cars;
     private boolean resetting = false;
     private int amountPollutionHasBeenReset = 0;
     private List<Car> carsNeedingHelp = new ArrayList<>();
     private HelpCar helpCar;
+    private Bird bird;
 
     public DataCenter(Map map) {
         this.map = map;
     }
 
     public void askForHelp(Car car) {
-        carsNeedingHelp.add(car);
+        synchronized (carsNeedingHelp) {
+            carsNeedingHelp.add(car);
+        }
         if (helpCar == null) {
             helpCar = new HelpCar(this, Engine.ELECTRIC, -1);
         }
@@ -78,15 +83,18 @@ public class DataCenter {
                     },
                     2000
             );
+            amountPollutionHasBeenReset++;
+
         }
-        amountPollutionHasBeenReset++;
     }
 
-    private void notifyCarsWithPetrolAndDieselEngine() {
-        for (Car car: cars) {
-            if (car.getEngine() == Engine.PETROL || car.getEngine() == Engine.DIESEL) {
-                synchronized (car) {
-                    car.notify();
+    private synchronized void notifyCarsWithPetrolAndDieselEngine() {
+        synchronized (cars) {
+            for (Car car : cars) {
+                if (car.getEngine() == Engine.PETROL || car.getEngine() == Engine.DIESEL) {
+                    synchronized (car) {
+                        car.notify();
+                    }
                 }
             }
         }
@@ -101,12 +109,35 @@ public class DataCenter {
 
     public void addCar(Car car) {
         synchronized (this) {
+            if (cars == null) {
+                cars = new ArrayList<>();
+            }
             carCount++;
             if (car.getEngine() == Engine.DIESEL || car.getEngine() == Engine.PETROL) {
                 internalCombustionEngineCount++;
             }
             cars.add(car);
         }
+    }
+
+    public long countCarsWithPetrolEngine() {
+        return cars.stream().filter(c -> c.getEngine() == Engine.PETROL).count();
+    }
+
+    public long countCarsWithDieselEngine() {
+        return cars.stream().filter(c -> c.getEngine() == Engine.DIESEL).count();
+    }
+
+    public long countCarsWithElectricEngine() {
+        return cars.stream().filter(c -> c.getEngine() == Engine.ELECTRIC).count();
+    }
+
+    public long countCarsWithLemonadeEngine() {
+        return cars.stream().filter(c -> c.getEngine() == Engine.LEMONADE).count();
+    }
+
+    public void getOverViewOfCityTraffic(CityDataFormat strategy) {
+        System.out.println(strategy.formatData(this));
     }
 
     public Map getMap() {
@@ -127,5 +158,13 @@ public class DataCenter {
 
     public double getPollution() {
         return pollution;
+    }
+
+    public Bird getBird() {
+        return bird;
+    }
+
+    public void setBird(Bird bird) {
+        this.bird = bird;
     }
 }

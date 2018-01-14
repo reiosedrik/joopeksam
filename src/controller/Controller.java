@@ -1,5 +1,6 @@
 package controller;
 
+import bird.Bird;
 import car.Car;
 import car.Engine;
 import datacenter.DataCenter;
@@ -16,9 +17,12 @@ public class Controller {
     public static void main(String[] args) {
         DataCenter dataCenter = new DataCenter(Map.createNew());
         ExecutorService service = Executors.newFixedThreadPool(TOTAL_CARS_TO_MAKE);
+        service.execute(new Bird(dataCenter));
+
         for (int i = 0; i < TOTAL_CARS_TO_MAKE; i++) {
             service.execute(new Car(dataCenter, createRandomEngine(i), i));
         }
+        service.shutdown();
     }
 
     private static Engine createRandomEngine(int n) {
