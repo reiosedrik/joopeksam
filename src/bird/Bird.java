@@ -20,7 +20,7 @@ public class Bird implements Runnable{
 
     @Override
     public void run() {
-        while (dataCenter.getAmountPollutionHasBeenReset() < 6) {
+        while (dataCenter.getAmountPollutionHasBeenReset() < 5) {
 //        while (count < 4) {
             try {
                 synchronized (this) {
@@ -40,6 +40,7 @@ public class Bird implements Runnable{
             }
         }
 //        service.shutdownNow();
+        System.out.println("bird finished, waiting pollution: " + dataCenter.getCarsWaitingForPollutionReset().size());
         dataCenter.getOverViewOfCityTraffic(new JSONFormat());
     }
 

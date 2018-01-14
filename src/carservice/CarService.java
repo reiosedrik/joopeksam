@@ -46,7 +46,7 @@ public class CarService {
             }
         }
         timesUsed++;
-        System.out.println(String.format("Car %d used %s cars in line: %d", car.getN(), name, carsWaiting.size()));
+//        System.out.println(String.format("Car %d used %s cars in line: %d", car.getN(), name, carsWaiting.size()));
     }
 
     public void getInfoAboutServedCars(Predicate<Car> p) {

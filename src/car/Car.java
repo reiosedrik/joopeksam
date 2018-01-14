@@ -98,7 +98,13 @@ public class Car implements Runnable {
             if (!dataCenter.isDrivingAllowedWith(engine)) {
 //                System.out.println("not allowed " + engine);
                 synchronized (this) {
+                    synchronized (dataCenter.getCarsWaitingForPollutionReset()) {
+                        dataCenter.getCarsWaitingForPollutionReset().add(this);
+                    }
                     wait();
+                    synchronized (dataCenter.getCarsWaitingForPollutionReset()) {
+                        dataCenter.getCarsWaitingForPollutionReset().remove(this);
+                    }
                 }
                 timesStoppedBecauseOfPollution++;
                 if (timesStoppedBecauseOfPollution >= 2) {

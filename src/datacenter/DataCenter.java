@@ -23,6 +23,7 @@ public class DataCenter {
     private List<Car> carsNeedingHelp = new ArrayList<>();
     private HelpCar helpCar;
     private Bird bird;
+    private List<Car> carsWaitingForPollutionReset = new ArrayList<>();
 
     public DataCenter(Map map) {
         this.map = map;
@@ -78,7 +79,7 @@ public class DataCenter {
                                 pollution *= 0.4;
                             }
                             resetting = false;
-                            notifyCarsWithPetrolAndDieselEngine();
+                            notifyCarsWaiting();
                         }
                     },
                     2000
@@ -88,16 +89,16 @@ public class DataCenter {
         }
     }
 
-    private synchronized void notifyCarsWithPetrolAndDieselEngine() {
-        synchronized (cars) {
-            for (Car car : cars) {
-                if (car.getEngine() == Engine.PETROL || car.getEngine() == Engine.DIESEL) {
-                    synchronized (car) {
-                        car.notify();
-                    }
+    private void notifyCarsWaiting() {
+        synchronized (carsWaitingForPollutionReset) {
+            for (Car car : carsWaitingForPollutionReset) {
+                synchronized (car) {
+                    car.notify();
                 }
+
             }
         }
+//        carsWaitingForPollutionReset.clear();
     }
 
     public boolean isDrivingAllowedWith(Engine engine) {
@@ -119,6 +120,11 @@ public class DataCenter {
             cars.add(car);
         }
     }
+
+    public synchronized void addCarThatIsWaitingForPollution(Car car) {
+        carsWaitingForPollutionReset.add(car);
+    }
+
 
     public long countCarsWithPetrolEngine() {
         return cars.stream().filter(c -> c.getEngine() == Engine.PETROL).count();
@@ -166,5 +172,9 @@ public class DataCenter {
 
     public void setBird(Bird bird) {
         this.bird = bird;
+    }
+
+    public List<Car> getCarsWaitingForPollutionReset() {
+        return carsWaitingForPollutionReset;
     }
 }
