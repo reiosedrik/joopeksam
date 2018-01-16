@@ -11,7 +11,8 @@ public class JSONFormat implements CityDataFormat {
                 + ", \"Diesel Engines\": " + dataCenter.countCarsWithDieselEngine()
                 + ", \"Electric Engines\": " + dataCenter.countCarsWithElectricEngine()
                 + ", \"Lemonade Engines\": " + dataCenter.countCarsWithLemonadeEngine()
-                + ", \"Pollution\": " + dataCenter.getPollution();
+                + ", \"Pollution\": " + dataCenter.getPollution()
+                + " }";
 
     }
 }

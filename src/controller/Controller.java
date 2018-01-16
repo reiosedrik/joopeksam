@@ -16,27 +16,27 @@ public class Controller {
 
     public static void main(String[] args) {
         DataCenter dataCenter = new DataCenter(Map.createNew());
-        ExecutorService service = Executors.newFixedThreadPool(TOTAL_CARS_TO_MAKE);
+        ExecutorService service = Executors.newFixedThreadPool(TOTAL_CARS_TO_MAKE + 1);
         service.execute(new Bird(dataCenter));
 
         for (int i = 0; i < TOTAL_CARS_TO_MAKE; i++) {
-            service.execute(new Car(dataCenter, createRandomEngine(i), i));
+            service.execute(new Car(dataCenter, Engine.createRandom(i), i));
         }
         service.shutdown();
     }
 
-    private static Engine createRandomEngine(int n) {
-        double randomNum = Math.random();
-        if (n % 10 == 0) {
-            if (randomNum > 0.5) {
-                return Engine.ELECTRIC;
-            } else {
-                return Engine.LEMONADE;
-            }
-        }
-        if (randomNum > 0.5) {
-            return Engine.PETROL;
-        }
-        return Engine.DIESEL;
-    }
+//    private static Engine createRandom(int n) {
+//        double randomNum = Math.random();
+//        if (n % 10 == 0) {
+//            if (randomNum > 0.5) {
+//                return Engine.ELECTRIC;
+//            } else {
+//                return Engine.LEMONADE;
+//            }
+//        }
+//        if (randomNum > 0.5) {
+//            return Engine.PETROL;
+//        }
+//        return Engine.DIESEL;
+//    }
 }

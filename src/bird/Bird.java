@@ -2,9 +2,6 @@ package bird;
 
 import datacenter.DataCenter;
 import format.JSONFormat;
-import format.TextFormat;
-
-import java.util.concurrent.ExecutorService;
 
 public class Bird implements Runnable{
 
@@ -21,7 +18,6 @@ public class Bird implements Runnable{
     @Override
     public void run() {
         while (dataCenter.getAmountPollutionHasBeenReset() < 5) {
-//        while (count < 4) {
             try {
                 synchronized (this) {
                     wait(4000);
@@ -39,9 +35,8 @@ public class Bird implements Runnable{
                 e.printStackTrace();
             }
         }
-//        service.shutdownNow();
         System.out.println("bird finished, waiting pollution: " + dataCenter.getCarsWaitingForPollutionReset().size());
-        dataCenter.getOverViewOfCityTraffic(new JSONFormat());
+//        dataCenter.getOverViewOfCityTraffic(new JSONFormat());
     }
 
     public int getCount() {

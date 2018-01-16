@@ -15,7 +15,6 @@ public class Car implements Runnable {
     Map map;
     int amountOfStreetsPassed = 0;
     DataCenter dataCenter;
-
     private Street currentStreet;
     private Random random;
     private int n;
@@ -43,7 +42,7 @@ public class Car implements Runnable {
     public void turnToNextStreet() throws InterruptedException {
         getTheStreetBeforeTurning();
         currentCrossRoad = map.getNextCrossRoad(currentCrossRoad);
-        if (currentStreet!= null) {
+        if (currentStreet != null) {
             if (timesDrivenThroughStreetWithBadConditions >= 3 && tires == Tires.DEFAULT) {
                 askForHelpAndWait();
             }
@@ -78,7 +77,6 @@ public class Car implements Runnable {
 
     public void getTheStreetBeforeTurning() {
         currentStreet = currentCrossRoad.getCurrentStreet();
-//        if (currentStreet != null )System.out.println(currentStreet.getName());
 
     }
 
@@ -90,26 +88,28 @@ public class Car implements Runnable {
         boolean hasDrivenThroughSevenStreetsInARow = amountOfStreetsPassed % 7 == 0;
         Thread.sleep(getRandomTimeForDrivingThroughStreet());
         amountOfStreetsPassed++;
-        dataCenter.increasePollutionForFiveStreets(engine);
         if (hasDrivenThroughFiveStreetsInARow) {
             sendInfoToDataCenter();
         }
         if (hasDrivenThroughSevenStreetsInARow) {
             if (!dataCenter.isDrivingAllowedWith(engine)) {
-//                System.out.println("not allowed " + engine);
-                synchronized (this) {
-                    synchronized (dataCenter.getCarsWaitingForPollutionReset()) {
-                        dataCenter.getCarsWaitingForPollutionReset().add(this);
-                    }
-                    wait();
-                    synchronized (dataCenter.getCarsWaitingForPollutionReset()) {
-                        dataCenter.getCarsWaitingForPollutionReset().remove(this);
-                    }
-                }
+                waitForPollutionToClear();
                 timesStoppedBecauseOfPollution++;
                 if (timesStoppedBecauseOfPollution >= 2) {
                     decideIfShouldUseEconomicEngine();
                 }
+            }
+        }
+    }
+
+    private void waitForPollutionToClear() throws InterruptedException {
+        synchronized (this) {
+            synchronized (dataCenter.getCarsWaitingForPollutionReset()) {
+                dataCenter.getCarsWaitingForPollutionReset().add(this);
+            }
+            wait();
+            synchronized (dataCenter.getCarsWaitingForPollutionReset()) {
+                dataCenter.getCarsWaitingForPollutionReset().remove(this);
             }
         }
     }
@@ -140,7 +140,7 @@ public class Car implements Runnable {
         }
         synchronized (dataCenter.getCars()) {
             dataCenter.getCars().remove(this);
-            System.out.println(n + " stopped, left: " + dataCenter.getCars().size());
+            System.out.println("Car " + n + " stopped, left: " + dataCenter.getCars().size());
         }
     }
 

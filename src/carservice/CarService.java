@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 
 public class CarService {
 
+    public static final int SERVICE_TIME = 50;
     private List<Car> carsWaiting = new ArrayList<>();
     private String name;
     private int timesUsed = 0;
@@ -34,7 +35,7 @@ public class CarService {
             car.setEngine(getNewEngineForCar());
         }
         synchronized (car) {
-            car.wait(50);
+            car.wait(SERVICE_TIME);
         }
         carsWaiting.remove(car);
         if (carsWaiting.size() > 0) {
@@ -45,12 +46,16 @@ public class CarService {
                 }
             }
         }
+        carsThatHaveUsedThis.add(car);
         timesUsed++;
-//        System.out.println(String.format("Car %d used %s cars in line: %d", car.getN(), name, carsWaiting.size()));
+        System.out.println(String.format("Car %d used %s, in line: %d", car.getN(), name, carsWaiting.size()));
+//        if (carsThatHaveUsedThis.size() % 50 == 0) {
+//            System.out.println(getInfoAboutServedCars(c -> c.getEngine() == Engine.PETROL));
+//        }
     }
 
-    public void getInfoAboutServedCars(Predicate<Car> p) {
-        System.out.println("served cars");
+    public int getInfoAboutServedCars(Predicate<Car> p) {
+        return (int) carsThatHaveUsedThis.stream().filter(p).count();
     }
 
     private Engine getNewEngineForCar() {

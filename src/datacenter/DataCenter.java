@@ -16,6 +16,7 @@ public class DataCenter {
     private int carCount = 0;
     private int internalCombustionEngineCount = 0;
     private double pollution = 0;
+    private double pollutionAtBan;
     private static final int POLLUTION_AMOUNT_FOR_RESETTING = 400;
     private List<Car> cars;
     private boolean resetting = false;
@@ -58,7 +59,6 @@ public class DataCenter {
                 pollution += 0.5;
                 break;
         }
-//        System.out.println(pollution + " " + engine);
         if (!resetting) {
             if (pollution >= POLLUTION_AMOUNT_FOR_RESETTING) {
                 resetPollutionAfter2Seconds();
@@ -67,6 +67,7 @@ public class DataCenter {
     }
 
     private void resetPollutionAfter2Seconds() {
+        pollutionAtBan = pollution;
         resetting = true;
         synchronized (this) {
             new java.util.Timer().schedule(
@@ -76,7 +77,7 @@ public class DataCenter {
                             if (internalCombustionEngineCount < 70) {
                                 pollution = 0;
                             } else {
-                                pollution *= 0.4;
+                                pollution = 0.4 * pollutionAtBan;
                             }
                             resetting = false;
                             notifyCarsWaiting();
