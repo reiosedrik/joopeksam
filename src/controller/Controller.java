@@ -24,19 +24,4 @@ public class Controller {
         }
         service.shutdown();
     }
-
-//    private static Engine createRandom(int n) {
-//        double randomNum = Math.random();
-//        if (n % 10 == 0) {
-//            if (randomNum > 0.5) {
-//                return Engine.ELECTRIC;
-//            } else {
-//                return Engine.LEMONADE;
-//            }
-//        }
-//        if (randomNum > 0.5) {
-//            return Engine.PETROL;
-//        }
-//        return Engine.DIESEL;
-//    }
 }
